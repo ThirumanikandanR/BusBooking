@@ -2,9 +2,10 @@ package com.busbooking.auth.payload.request;
 
 import java.util.Set;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 
 @Data
@@ -17,7 +18,7 @@ public class SignupRequest {
 
 	private String firstName;
 
-	private String LastName;
+	private String lastName;
 
 	@NotBlank
 	@Email

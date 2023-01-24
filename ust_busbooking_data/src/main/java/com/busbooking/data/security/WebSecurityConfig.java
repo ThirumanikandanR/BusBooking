@@ -71,11 +71,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/swagger-resources/**").permitAll()
             .antMatchers("/actuator/**").permitAll()
             .antMatchers("/v2/**").permitAll()
-            .antMatchers("/api/hcs/publishmirronode/user").permitAll()
-            .antMatchers("/api/token/transfer").permitAll()
-            .antMatchers("/api/hedera/createwallet").permitAll()
-            .antMatchers("/api/hts/**").permitAll()
-            .antMatchers("/api/merchant/**").permitAll()
 			.anyRequest().authenticated();
 
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

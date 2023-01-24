@@ -13,6 +13,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import com.busbooking.data.enums.ERole;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "roles")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Role {
 	@Id
 	@GenericGenerator(name = "uuid-gen", strategy = "uuid2")
