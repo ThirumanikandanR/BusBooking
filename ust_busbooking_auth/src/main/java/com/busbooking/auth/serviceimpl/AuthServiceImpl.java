@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService{
 	}
 	
 	private Set<Role> getRole(Set<String> strRoles, Set<Role> roles) {
-		if (Objects.nonNull(strRoles)) {
+		if (Objects.isNull(strRoles)) {
 			if (!roleRepository.existsByName(ERole.ROLE_CUSTOMER)) {
 				throw new RoleNotFoundException();
 			}
