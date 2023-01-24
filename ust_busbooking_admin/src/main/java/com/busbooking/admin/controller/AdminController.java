@@ -3,16 +3,17 @@ package com.busbooking.admin.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.busbooking.admin.request.BusDetailsDto;
 import com.busbooking.admin.service.AdminService;
-
-import io.swagger.models.Response;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -29,5 +30,20 @@ public class AdminController {
 		
 	}
 	
+	@PutMapping("/update/bus/info/{id}")
+	public ResponseEntity<?> updateBusDetails(@PathVariable String id,@RequestBody BusDetailsDto updaDto){
+		return adminService.updateBusDetails(id,updaDto);
+		
+	}
+	
+	@DeleteMapping("/cancel/bus/{busId}")
+	public ResponseEntity<?> cancelBus(@PathVariable String busId){
+		return adminService.cancelBus(busId);
+	}
+	
+	@GetMapping("/get/all/user")
+	public ResponseEntity<?> viewAllUsers(){
+		return adminService.viewAllUsers();
+	}
 	
 }

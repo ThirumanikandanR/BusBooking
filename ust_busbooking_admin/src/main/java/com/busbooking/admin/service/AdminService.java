@@ -10,4 +10,12 @@ public interface AdminService {
 
 	ResponseEntity<?> saveBusDetails(BusDetailsDto busDetailsDto);
 
+	ResponseEntity<?> updateBusDetails(String id, BusDetailsDto updaDto);
+
+	ResponseEntity<?> cancelBus(String busId);
+
+	ResponseEntity<?> viewAllUsers();
+
+	
+
 }

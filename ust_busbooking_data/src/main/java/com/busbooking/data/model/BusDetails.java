@@ -40,6 +40,10 @@ public class BusDetails {
 	private String noOfSeats;
 
 	private String tkkPrice;
+	
+	private String fromPlace;
+	
+	private String toPlace;
 
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;

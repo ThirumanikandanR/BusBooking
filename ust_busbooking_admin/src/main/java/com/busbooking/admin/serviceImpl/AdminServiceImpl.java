@@ -1,6 +1,7 @@
 package com.busbooking.admin.serviceImpl;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -13,46 +14,112 @@ import com.busbooking.admin.service.AdminService;
 import com.busbooking.data.model.BusDetails;
 import com.busbooking.data.payload.response.MessageResponse;
 import com.busbooking.data.repository.BusDetailsRepository;
+import com.busbooking.data.repository.RoleRepository;
+import com.busbooking.data.repository.UserRepository;
 
 @Service
-public class AdminServiceImpl implements AdminService{
-	
+public class AdminServiceImpl implements AdminService {
+
 	@Autowired
 	BusDetailsRepository busdeRepository;
-	
+
+	@Autowired
+	UserRepository userRepository;
+
+	@Autowired
+	RoleRepository roleRepository;
+
 	@Autowired
 	Environment env;
 
 	@Override
 	public ResponseEntity<?> saveBusDetails(BusDetailsDto busDetailsDto) {
-		if(Objects.isNull(busDetailsDto)) {
-			return ResponseEntity.ok(
-					new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		if (Objects.isNull(busDetailsDto)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
 		}
-		BusDetails busDetails=null;
-		
+		BusDetails busDetails = null;
+
 		try {
-			busDetails = BusDetails.builder()
-					.busNo(busDetailsDto.getBusNo())
-					.busName(busDetailsDto.getBusName())
-					.driverName(busDetailsDto.getDriverName())
-					.contNum(busDetailsDto.getContNum())
-					.noOfSeats(busDetailsDto.getNoOfSeats())
-					.date(busDetailsDto.getDate())
-					.depTime(busDetailsDto.getDepTime())
-					.arvTime(busDetailsDto.getArvTime())
-					.tkkPrice(busDetailsDto.getTkkPrice())
-					.build();
+			busDetails = BusDetails.builder().busNo(busDetailsDto.getBusNo()).busName(busDetailsDto.getBusName())
+					.driverName(busDetailsDto.getDriverName()).contNum(busDetailsDto.getContNum())
+					.noOfSeats(busDetailsDto.getNoOfSeats()).date(busDetailsDto.getDate())
+					.depTime(busDetailsDto.getDepTime()).arvTime(busDetailsDto.getArvTime())
+					.tkkPrice(busDetailsDto.getTkkPrice()).fromPlace(busDetailsDto.getFromPlace())
+					.toPlace(busDetailsDto.getToPlace()).build();
 			busdeRepository.save(busDetails);
-			
-			return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
-					env.getProperty("busDetails.saved"), busDetails));
-		}
-		catch(Exception e) {
-			return ResponseEntity.ok(
-					new MessageResponse(env.getProperty("BusDetails.not.saved"), HttpStatus.BAD_REQUEST.value()));
+
+			return ResponseEntity
+					.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("busDetails.saved"), busDetails));
+		} catch (Exception e) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("BusDetails.not.saved"), HttpStatus.BAD_REQUEST.value()));
 		}
 	}
-	
 
+	@Override
+	public ResponseEntity<?> updateBusDetails(String id, BusDetailsDto updaDto) {
+		if (Objects.isNull(updaDto) || Objects.isNull(id)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		}
+
+		try {
+			Optional<BusDetails> busId = busdeRepository.findById(id);
+			if (Objects.isNull(busId)) {
+				return ResponseEntity
+						.ok(new MessageResponse(env.getProperty("Invalid.id"), HttpStatus.BAD_REQUEST.value()));
+			} else {
+				BusDetails updateBus = busId.get();
+
+				updateBus.setBusNo(updaDto.getBusNo());
+				updateBus.setBusName(updaDto.getBusName());
+				updateBus.setDriverName(updaDto.getDriverName());
+				updateBus.setContNum(updaDto.getContNum());
+				updateBus.setNoOfSeats(updaDto.getNoOfSeats());
+				updateBus.setDate(updaDto.getDate());
+				updateBus.setArvTime(updaDto.getArvTime());
+				updateBus.setTkkPrice(updaDto.getTkkPrice());
+				updateBus.setFromPlace(updaDto.getFromPlace());
+				updateBus.setToPlace(updaDto.getToPlace());
+
+				busdeRepository.save(updateBus);
+
+				return ResponseEntity.ok(
+						new MessageResponse(HttpStatus.OK.value(), env.getProperty("updated.busDetails"), updateBus));
+
+			}
+
+		} catch (Exception e) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("update.BusDetails.fail"), HttpStatus.BAD_REQUEST.value()));
+		}
+	}
+
+	@Override
+	public ResponseEntity<?> cancelBus(String busId) {
+		try {
+			Optional<BusDetails> cancelBus = null;
+			if (Objects.nonNull(busId)) {
+				cancelBus = busdeRepository.findById(busId);
+			}
+			if (cancelBus.isPresent()) {
+				busdeRepository.deleteById(busId);
+			}
+			return ResponseEntity
+					.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("cancelld.bus.success"), cancelBus));
+		} catch (Exception e) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("cancel.bus.fail"), HttpStatus.BAD_REQUEST.value()));
+		}
+
+	}
+
+	@Override
+	public ResponseEntity<?> viewAllUsers() {
+//		String userRoleId="9ab2cb7e-7c27-11eb-9439-0242ac130002";
+//	Optional<Role> userId=roleRepository.findById(userRoleId);
+//	User user=userRepository.findByusername(userRoleId);
+		return null;
+	}
 }

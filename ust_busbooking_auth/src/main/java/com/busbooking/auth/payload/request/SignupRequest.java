@@ -6,6 +6,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.busbooking.data.enums.ERole;
+
 import lombok.Data;
 
 @Data
@@ -39,5 +41,7 @@ public class SignupRequest {
 	
 	@NotNull
 	private Set<String> role;
+	
+
 
 }
