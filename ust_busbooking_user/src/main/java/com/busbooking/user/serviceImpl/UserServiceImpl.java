@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
 		}
 		List<BusDetails> sortDate = null;
 		List<BusDetails> sortPlace = null;
+		List<BusDetails> sortByDateAndPlace=null;
 		if (Objects.nonNull(date) && StringUtils.isEmpty(fromPlace) && StringUtils.isEmpty(fromPlace)) {
 			sortDate = busDetailsRepository.findByDate(date);
 			if (Objects.isNull(sortDate)) {
@@ -57,17 +58,17 @@ public class UserServiceImpl implements UserService {
 					new MessageResponse(HttpStatus.OK.value(), env.getProperty("fetched.busDetails.byDate"), sortDate));
 		} else if (Objects.nonNull(date) && !StringUtils.isEmpty(fromPlace) && !StringUtils.isEmpty(fromPlace)) {
 			sortPlace = busDetailsRepository.findByDate(date);
-			List<BusDetails> sortByDateAndPlace = sortPlace.stream()
+			 sortByDateAndPlace = sortPlace.stream()
 					.filter(f -> f.getFromPlace().equals(fromPlace) && f.getToPlace().equals(toPlace))
 					.collect(Collectors.toList());
 			if (sortByDateAndPlace.isEmpty()) {
 				return ResponseEntity
 						.ok(new MessageResponse(env.getProperty("place.not.found"), HttpStatus.NOT_FOUND.value()));
 			}
-			return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
-					env.getProperty("fetched.busDetails.byDateAndPlaces"), sortByDateAndPlace));
+			
 		}
-		return null;
+		return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
+				env.getProperty("fetched.busDetails.byDateAndPlaces"), sortByDateAndPlace));
 
 	}
 
