@@ -16,6 +16,8 @@ public interface AdminService {
 
 	ResponseEntity<?> viewAllUsers();
 
+	ResponseEntity<?> viewAllPassengersByBusId(String busId);
+
 	
 
 }

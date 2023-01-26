@@ -1,5 +1,7 @@
 package com.busbooking.admin.serviceImpl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -10,9 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.busbooking.admin.request.BusDetailsDto;
+import com.busbooking.admin.response.AllPassengerResponse;
+import com.busbooking.admin.response.PassengerDetails;
 import com.busbooking.admin.service.AdminService;
+import com.busbooking.data.model.BookTickets;
 import com.busbooking.data.model.BusDetails;
 import com.busbooking.data.payload.response.MessageResponse;
+import com.busbooking.data.repository.BookTicketsRepository;
 import com.busbooking.data.repository.BusDetailsRepository;
 import com.busbooking.data.repository.RoleRepository;
 import com.busbooking.data.repository.UserRepository;
@@ -31,6 +37,9 @@ public class AdminServiceImpl implements AdminService {
 
 	@Autowired
 	Environment env;
+
+	@Autowired
+	BookTicketsRepository bookTicketsRepository;
 
 	@Override
 	public ResponseEntity<?> saveBusDetails(BusDetailsDto busDetailsDto) {
@@ -121,5 +130,37 @@ public class AdminServiceImpl implements AdminService {
 //	Optional<Role> userId=roleRepository.findById(userRoleId);
 //	User user=userRepository.findByusername(userRoleId);
 		return null;
+	}
+
+	@Override
+	public ResponseEntity<?> viewAllPassengersByBusId(String busId) {
+
+		if (Objects.isNull(busId)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		}
+		BusDetails bId = busdeRepository.findById(busId).get();
+		if (Objects.isNull(bId)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("bus.not.found"), HttpStatus.BAD_REQUEST.value()));
+		}
+		List<BookTickets> passengers = bookTicketsRepository.findByBusId(bId);
+
+		List<PassengerDetails> allpassenger = new ArrayList<>();
+
+		for (BookTickets pass : passengers) {
+
+			PassengerDetails passengerDetails = PassengerDetails.builder().PassengerName(pass.getPassengerName())
+					.ticketId(pass.getTicketId()).age(pass.getAge()).gender(pass.getGender()).seatNo(pass.getSeatNo())
+					.date(pass.getDate()).status(pass.getStatus()).build();
+
+			allpassenger.add(passengerDetails);
+		}
+		AllPassengerResponse allPassengerResponse = AllPassengerResponse.builder().bus(bId).passengers(allpassenger)
+				.build();
+
+		return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
+				env.getProperty("passenger.fteched.success"), allPassengerResponse));
+
 	}
 }

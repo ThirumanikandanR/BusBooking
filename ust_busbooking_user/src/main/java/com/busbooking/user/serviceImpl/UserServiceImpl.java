@@ -19,7 +19,7 @@ import com.busbooking.data.model.BusDetails;
 import com.busbooking.data.model.User;
 import com.busbooking.data.payload.response.MessageResponse;
 import com.busbooking.data.repository.BusDetailsRepository;
-import com.busbooking.data.repository.PassengerDetailsRepository;
+import com.busbooking.data.repository.BookTicketsRepository;
 import com.busbooking.data.repository.UserRepository;
 import com.busbooking.user.request.BookTicketsDto;
 import com.busbooking.user.request.PassengerDetailsDto;
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
 //	TicketBookingRepository ticBookingRepository;
 
 	@Autowired
-	PassengerDetailsRepository passengerDetailsRepository;
+	BookTicketsRepository bookTicketsRepository;
 
 	@Autowired
 	Environment env;
@@ -118,11 +118,11 @@ public class UserServiceImpl implements UserService {
 			
 			passengerDeatils = BookTickets.builder().PassengerName(PassengerInfo.getPname()).age(PassengerInfo.getAge())
 					.gender(PassengerInfo.getGender()).date(bus.getDate()).seatNo(PassengerInfo.getSeatNo())
-					.busDetails(bus)
+					.busId(bus)
 					.status(TicketStatus.CONFIRMED)
 					.userId(user).build();
 			
-			passengerDetailsRepository.save(passengerDeatils);
+			bookTicketsRepository.save(passengerDeatils);
 			
 			psngResponse=psngResponse.builder()
 			.ticketId(passengerDeatils.getTicketId())
@@ -145,6 +145,39 @@ public class UserServiceImpl implements UserService {
 
 		return ResponseEntity
 				.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("busticket.booked.success"), ticketResponse));
+	}
+
+	@Override
+	public ResponseEntity<?> viewTicketsByCustomerId(String id) {
+		if(Objects.isNull(id)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		}
+		User userId= userRepository.findById(id).get();
+		if(Objects.isNull(userId)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("customer.not.found"), HttpStatus.BAD_REQUEST.value()));
+		}
+		List<BookTickets> tickets=bookTicketsRepository.findByUserId(userId);
+		
+		return ResponseEntity
+				.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("busticket.fteched.success"), tickets));
+	}
+
+	@Override
+	public ResponseEntity<?> viewTicketsByTicketId(String tId) {
+		if(Objects.isNull(tId)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		}
+		BookTickets tickets = bookTicketsRepository.findById(tId).get();
+		if(Objects.isNull(tickets)) {
+		return ResponseEntity
+				.ok(new MessageResponse(env.getProperty("ticket.not.found"), HttpStatus.BAD_REQUEST.value()));
+		}
+		return ResponseEntity
+				.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("ticket.fteched.success"), tickets));
+		
 	}
 
 }

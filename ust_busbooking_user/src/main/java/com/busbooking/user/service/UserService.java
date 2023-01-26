@@ -16,4 +16,8 @@ public interface UserService {
 
 	ResponseEntity<?> bookTickets(BookTicketsDto bookTicketsDto);
 
+	ResponseEntity<?> viewTicketsByCustomerId(String id);
+
+	ResponseEntity<?> viewTicketsByTicketId(String tId);
+
 }

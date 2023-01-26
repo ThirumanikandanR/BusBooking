@@ -51,8 +51,8 @@ public class BookTickets {
 	private User userId;
 	
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "bus_ids", nullable = false)
-	private BusDetails busDetails;
+	@JoinColumn(name = "bus_id", nullable = false)
+	private BusDetails busId;
 
 	private TicketStatus status;
 }

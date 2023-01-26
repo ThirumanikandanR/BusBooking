@@ -46,4 +46,11 @@ public class AdminController {
 		return adminService.viewAllUsers();
 	}
 	
+	@GetMapping("/view/all/passengers/{busId}")
+	public ResponseEntity<?> viewAllPassengersByBusId(@PathVariable String busId){
+		return adminService.viewAllPassengersByBusId(busId);
+		
+		
+	}
+	
 }
