@@ -64,6 +64,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			// don't create session
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests().antMatchers("/api/auth/**").permitAll()
+			.antMatchers("/api/admin/**").permitAll()
 			.antMatchers("/api/test/**").permitAll()
 			 // allow anonymous resource requests 
 			.antMatchers("/swagger-ui/**").permitAll()  

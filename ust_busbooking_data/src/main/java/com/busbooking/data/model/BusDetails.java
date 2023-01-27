@@ -37,7 +37,7 @@ public class BusDetails {
 
 	private String contNum;
 
-	private String noOfSeats;
+	private int noOfSeats;
 
 	private String tkkPrice;
 	

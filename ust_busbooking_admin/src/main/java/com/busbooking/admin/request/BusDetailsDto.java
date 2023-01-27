@@ -15,7 +15,7 @@ public class BusDetailsDto {
 	
 	private String contNum;
 	
-	private String noOfSeats;
+	private int noOfSeats;
 	
 	private String tkkPrice;
 	

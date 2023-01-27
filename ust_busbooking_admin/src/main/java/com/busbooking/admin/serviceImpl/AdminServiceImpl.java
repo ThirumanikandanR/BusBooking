@@ -163,4 +163,36 @@ public class AdminServiceImpl implements AdminService {
 				env.getProperty("passenger.fteched.success"), allPassengerResponse));
 
 	}
+
+	@Override
+	public ResponseEntity<?> updateSeatCount(String busId, int seatCount) {
+		if (Objects.isNull(busId) && Objects.isNull(seatCount)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		}
+		try {
+			Optional<BusDetails> busInfo = busdeRepository.findById(busId);
+			if (Objects.isNull(busId)) {
+				return ResponseEntity
+						.ok(new MessageResponse(env.getProperty("bus.not.found"), HttpStatus.BAD_REQUEST.value()));
+			} else {
+				BusDetails updateSeatCount = busInfo.get();
+
+				int totalSeats = updateSeatCount.getNoOfSeats();
+
+				int noOfSeats = totalSeats - seatCount;
+
+				updateSeatCount.setNoOfSeats(noOfSeats);
+
+				busdeRepository.save(updateSeatCount);
+
+				return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
+						env.getProperty("updated.seat.success"), updateSeatCount));
+
+			}
+		} catch (Exception e) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("update.seatCount.fail"), HttpStatus.BAD_REQUEST.value()));
+		}
+	}
 }

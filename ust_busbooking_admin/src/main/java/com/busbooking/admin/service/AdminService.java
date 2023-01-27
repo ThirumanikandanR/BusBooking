@@ -18,6 +18,8 @@ public interface AdminService {
 
 	ResponseEntity<?> viewAllPassengersByBusId(String busId);
 
+	ResponseEntity<?> updateSeatCount(String busId, int seatCount);
+
 	
 
 }

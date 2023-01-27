@@ -12,7 +12,7 @@ import lombok.Data;
 @Builder
 public class TicketResponse {
 	
-	private User userDetails;
+	private UserDetails userDetails;
 	
 	private BusDetails busDetails;
 	
