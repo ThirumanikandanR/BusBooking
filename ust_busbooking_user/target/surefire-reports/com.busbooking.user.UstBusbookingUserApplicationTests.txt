@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.busbooking.user.UstBusbookingUserApplicationTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.553 s - in com.busbooking.user.UstBusbookingUserApplicationTests
