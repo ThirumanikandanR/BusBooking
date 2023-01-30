@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,14 +119,14 @@ public class UserServiceImpl implements UserService {
 					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
 		}
 
-		User user = userRepository.findById(bookTicketsDto.getUserId()).get();
-		if (Objects.isNull(user)) {
+		Optional<User> user = userRepository.findById(bookTicketsDto.getUserId());
+		if (!user.isPresent()) {
 			return ResponseEntity
 					.ok(new MessageResponse(env.getProperty("user.not.found"), HttpStatus.BAD_REQUEST.value()));
 		}
 
-		BusDetails bus = busDetailsRepository.findById(bookTicketsDto.getBusId()).get();
-		if (Objects.isNull(user)) {
+		Optional<BusDetails> bus = busDetailsRepository.findById(bookTicketsDto.getBusId());
+		if (!bus.isPresent()) {
 			return ResponseEntity
 					.ok(new MessageResponse(env.getProperty("bus.not.found"), HttpStatus.BAD_REQUEST.value()));
 		}
@@ -137,14 +138,14 @@ public class UserServiceImpl implements UserService {
 		for (PassengerDetailsDto PassengerInfo : bookTicketsDto.getPasanger()) {
 
 			passengerDeatils = BookTickets.builder().PassengerName(PassengerInfo.getPname()).age(PassengerInfo.getAge())
-					.gender(PassengerInfo.getGender()).date(bus.getDate()).seatNo(PassengerInfo.getSeatNo()).busId(bus)
-					.status(TicketStatus.CONFIRMED).userId(user).build();
+					.gender(PassengerInfo.getGender()).date(bus.get().getDate()).seatNo(PassengerInfo.getSeatNo()).busId(bus.get())
+					.status(TicketStatus.CONFIRMED).userId(user.get()).build();
 
 			bookTicketsRepository.save(passengerDeatils);
 
 			psngResponse = PassengerResponse.builder().ticketId(passengerDeatils.getTicketId())
 					.PassengerName(passengerDeatils.getPassengerName()).age(passengerDeatils.getAge())
-					.gender(passengerDeatils.getGender()).date(bus.getDate()).seatNo(passengerDeatils.getSeatNo())
+					.gender(passengerDeatils.getGender()).date(bus.get().getDate()).seatNo(passengerDeatils.getSeatNo())
 					.status(TicketStatus.CONFIRMED).build();
 
 			allPassenger.add(psngResponse);
@@ -153,13 +154,13 @@ public class UserServiceImpl implements UserService {
 
 		int seatCount = allPassenger.size();
 
-		UserDetails userInfo = UserDetails.builder().userId(user.getId()).userName(user.getUsername())
-				.emailId(user.getEmail()).build();
+		UserDetails userInfo = UserDetails.builder().userId(user.get().getId()).userName(user.get().getUsername())
+				.emailId(user.get().getEmail()).build();
 
-		ticketResponse = TicketResponse.builder().userDetails(userInfo).busDetails(bus).passengers(allPassenger)
+		ticketResponse = TicketResponse.builder().userDetails(userInfo).busDetails(bus.get()).passengers(allPassenger)
 				.build();
 
-		UpdateSeatCount seat = UpdateSeatCount.builder().busId(bus.getId()).seatCount(seatCount).build();
+		UpdateSeatCount seat = UpdateSeatCount.builder().busId(bus.get().getId()).seatCount(seatCount).build();
 
 		UriComponentsBuilder builder = UriComponentsBuilder
 				.fromHttpUrl("http://localhost:8083/api/admin/update/seat/count").queryParam("busId", seat.getBusId())
@@ -168,12 +169,12 @@ public class UserServiceImpl implements UserService {
 		ResponseEntity<String> response = restTemplate.exchange(builder.toUriString(), HttpMethod.PUT, entity,
 				String.class);
 
-		try {
-			sendInvoice(ticketResponse);
-		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			sendInvoice(ticketResponse);
+//		} catch (DocumentException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("busticket.booked.success"),
 				ticketResponse));
@@ -186,12 +187,12 @@ public class UserServiceImpl implements UserService {
 					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
 		}
 		try {
-			User userId = userRepository.findById(id).get();
-			if (Objects.isNull(userId)) {
+			Optional<User> userId = userRepository.findById(id);
+			if (!userId.isPresent()) {
 				return ResponseEntity
 						.ok(new MessageResponse(env.getProperty("customer.not.found"), HttpStatus.BAD_REQUEST.value()));
 			}
-			List<BookTickets> tickets = bookTicketsRepository.findByUserId(userId);
+			List<BookTickets> tickets = bookTicketsRepository.findByUserId(userId.get());
 
 			return ResponseEntity.ok(
 					new MessageResponse(HttpStatus.OK.value(), env.getProperty("busticket.fteched.success"), tickets));
@@ -208,8 +209,8 @@ public class UserServiceImpl implements UserService {
 					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
 		}
 		try {
-			BookTickets tickets = bookTicketsRepository.findById(tId).get();
-			if (Objects.isNull(tickets)) {
+			Optional<BookTickets> tickets = bookTicketsRepository.findById(tId);
+			if (!tickets.isPresent()) {
 				return ResponseEntity
 						.ok(new MessageResponse(env.getProperty("ticket.not.found"), HttpStatus.BAD_REQUEST.value()));
 			}
