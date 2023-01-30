@@ -169,12 +169,12 @@ public class UserServiceImpl implements UserService {
 		ResponseEntity<String> response = restTemplate.exchange(builder.toUriString(), HttpMethod.PUT, entity,
 				String.class);
 
-//		try {
-//			sendInvoice(ticketResponse);
-//		} catch (DocumentException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			sendInvoice(ticketResponse);
+		} catch (DocumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("busticket.booked.success"),
 				ticketResponse));
