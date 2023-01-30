@@ -1,5 +1,6 @@
 package com.busbooking.user.serviceImpl;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +10,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ import com.busbooking.data.payload.response.MessageResponse;
 import com.busbooking.data.repository.BookTicketsRepository;
 import com.busbooking.data.repository.BusDetailsRepository;
 import com.busbooking.data.repository.UserRepository;
+import com.busbooking.data.request.EmailResponse;
 import com.busbooking.user.request.BookTicketsDto;
 import com.busbooking.user.request.PassengerDetailsDto;
 import com.busbooking.user.request.UpdateSeatCount;
@@ -33,6 +37,10 @@ import com.busbooking.user.response.PassengerResponse;
 import com.busbooking.user.response.TicketResponse;
 import com.busbooking.user.response.UserDetails;
 import com.busbooking.user.service.UserService;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -160,6 +168,13 @@ public class UserServiceImpl implements UserService {
 		ResponseEntity<String> response = restTemplate.exchange(builder.toUriString(), HttpMethod.PUT, entity,
 				String.class);
 
+		try {
+			sendInvoice(ticketResponse);
+		} catch (DocumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(), env.getProperty("busticket.booked.success"),
 				ticketResponse));
 	}
@@ -204,6 +219,68 @@ public class UserServiceImpl implements UserService {
 			return ResponseEntity
 					.ok(new MessageResponse(env.getProperty("ticket.not.found"), HttpStatus.NOT_FOUND.value()));
 		}
+	}
+
+	public void sendInvoice(TicketResponse ticketResponse) throws DocumentException {
+
+		try {
+			Document document = new Document();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//	         FileOutputStream baos=new FileOutputStream(new File("E:\\BusTicket_Booking\\InvoiceLocation\\Tickets.pdf"));
+			PdfWriter.getInstance(document, baos);
+			document.open();
+
+			document.add(new Paragraph("Bus Ticket Invoice"));
+			document.add(new Paragraph("------------------------------------------------------------------"));
+			document.add(new Paragraph("User Details:"));
+			document.add(new Paragraph("User Id:" + ticketResponse.getUserDetails().getUserId()));
+			document.add(new Paragraph("User Name:" + ticketResponse.getUserDetails().getUserName()));
+			document.add(new Paragraph("User EmailId:" + ticketResponse.getUserDetails().getEmailId()));
+			document.add(new Paragraph("-------------------------------------------------------------------"));
+			document.add(new Paragraph("passenger Details:"));
+			for (PassengerResponse invoice : ticketResponse.getPassengers()) {
+				document.add(new Paragraph("Passenger Name:" + invoice.getPassengerName()));
+				document.add(new Paragraph("Passenger age:" + invoice.getAge()));
+				document.add(new Paragraph("Passenger gender:" + invoice.getGender()));
+			}
+			document.add(new Paragraph("------------------------------------------------------------------"));
+			document.add(new Paragraph("Bus Details:"));
+			document.add(new Paragraph("Bus Id:" + ticketResponse.getBusDetails().getId()));
+			document.add(new Paragraph("Bus No:" + ticketResponse.getBusDetails().getBusNo()));
+			document.add(new Paragraph("Bus Name:" + ticketResponse.getBusDetails().getBusName()));
+			document.add(new Paragraph("Bus DriverName:" + ticketResponse.getBusDetails().getDriverName()));
+			document.add(new Paragraph("Contact Num:" + ticketResponse.getBusDetails().getContNum()));
+			document.add(new Paragraph("From Place:" + ticketResponse.getBusDetails().getFromPlace()));
+			document.add(new Paragraph("To Place:" + ticketResponse.getBusDetails().getToPlace()));
+			document.add(new Paragraph("Departure Time:" + ticketResponse.getBusDetails().getDepTime()));
+			document.add(new Paragraph("Arriving Time:" + ticketResponse.getBusDetails().getArvTime()));
+			document.add(new Paragraph("Ticket Price:" + ticketResponse.getBusDetails().getTkkPrice()));
+			document.close();
+
+			byte[] pdfBytes = baos.toByteArray();
+			System.out.println("PDF created successfully with " + pdfBytes.length + " bytes.");
+
+			String url = "http://localhost:5000/api/email/send";
+			EmailResponse emailResponse = new EmailResponse();
+			emailResponse.setToemail(ticketResponse.getUserDetails().getEmailId());
+			emailResponse.setSubject("Ust BusTicket Invoice");
+			emailResponse.setBody("Please find the below Ticket Confirmation Details for your HAPPY JOURNEY!!");
+			emailResponse.setInvoice(pdfBytes);
+			postData(url, emailResponse);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Exception occured in Invoice generation!");
+		}
+	}
+
+	public ResponseEntity<String> postData(String url, Object request) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<Object> entity = new HttpEntity<>(request, headers);
+		return restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+
 	}
 
 }
