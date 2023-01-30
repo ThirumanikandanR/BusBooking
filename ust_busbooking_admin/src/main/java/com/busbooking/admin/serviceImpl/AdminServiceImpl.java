@@ -139,12 +139,12 @@ public class AdminServiceImpl implements AdminService {
 			return ResponseEntity
 					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
 		}
-		BusDetails bId = busdeRepository.findById(busId).get();
-		if (Objects.isNull(bId)) {
+		Optional<BusDetails> bId = busdeRepository.findById(busId);
+		if (!bId.isPresent()) {
 			return ResponseEntity
 					.ok(new MessageResponse(env.getProperty("bus.not.found"), HttpStatus.BAD_REQUEST.value()));
 		}
-		List<BookTickets> passengers = bookTicketsRepository.findByBusId(bId);
+		List<BookTickets> passengers = bookTicketsRepository.findByBusId(bId.get());
 
 		List<PassengerDetails> allpassenger = new ArrayList<>();
 
@@ -156,7 +156,7 @@ public class AdminServiceImpl implements AdminService {
 
 			allpassenger.add(passengerDetails);
 		}
-		AllPassengerResponse allPassengerResponse = AllPassengerResponse.builder().bus(bId).passengers(allpassenger)
+		AllPassengerResponse allPassengerResponse = AllPassengerResponse.builder().bus(bId.get()).passengers(allpassenger)
 				.build();
 
 		return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
