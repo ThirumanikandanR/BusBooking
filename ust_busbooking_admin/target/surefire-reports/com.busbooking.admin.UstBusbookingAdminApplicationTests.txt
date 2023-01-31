@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.busbooking.admin.UstBusbookingAdminApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 37.519 s - in com.busbooking.admin.UstBusbookingAdminApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.904 s - in com.busbooking.admin.UstBusbookingAdminApplicationTests

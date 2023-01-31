@@ -67,7 +67,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/api/admin/**").permitAll()
 			.antMatchers("/api/test/**").permitAll()
 			 // allow anonymous resource requests 
-			.antMatchers("/swagger-ui/**").permitAll()  
+			.antMatchers("/swagger-ui/**").permitAll()
+			.antMatchers("/swagger-ui.html").permitAll()
             .antMatchers("/webjars/**").permitAll()
             .antMatchers("/swagger-resources/**").permitAll()
             .antMatchers("/actuator/**").permitAll()
