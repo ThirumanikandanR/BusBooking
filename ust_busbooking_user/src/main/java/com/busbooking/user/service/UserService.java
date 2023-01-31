@@ -20,4 +20,6 @@ public interface UserService {
 
 	ResponseEntity<?> viewTicketsByTicketId(String tId);
 
+	ResponseEntity<?> cancelTickets(String tId);
+
 }

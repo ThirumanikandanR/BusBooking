@@ -138,8 +138,8 @@ public class UserServiceImpl implements UserService {
 		for (PassengerDetailsDto PassengerInfo : bookTicketsDto.getPasanger()) {
 
 			passengerDeatils = BookTickets.builder().PassengerName(PassengerInfo.getPname()).age(PassengerInfo.getAge())
-					.gender(PassengerInfo.getGender()).date(bus.get().getDate()).seatNo(PassengerInfo.getSeatNo()).busId(bus.get())
-					.status(TicketStatus.CONFIRMED).userId(user.get()).build();
+					.gender(PassengerInfo.getGender()).date(bus.get().getDate()).seatNo(PassengerInfo.getSeatNo())
+					.busId(bus.get()).status(TicketStatus.CONFIRMED).userId(user.get()).build();
 
 			bookTicketsRepository.save(passengerDeatils);
 
@@ -224,6 +224,7 @@ public class UserServiceImpl implements UserService {
 
 	public void sendInvoice(TicketResponse ticketResponse) throws DocumentException {
 
+		String ticketStatus = null;
 		try {
 			Document document = new Document();
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -243,6 +244,10 @@ public class UserServiceImpl implements UserService {
 				document.add(new Paragraph("Passenger Name:" + invoice.getPassengerName()));
 				document.add(new Paragraph("Passenger age:" + invoice.getAge()));
 				document.add(new Paragraph("Passenger gender:" + invoice.getGender()));
+				document.add(new Paragraph("Passenger seatNo:" + invoice.getSeatNo()));
+				document.add(new Paragraph("Ticket Status:" + invoice.getStatus()));
+
+				ticketStatus = invoice.getStatus().toString();
 			}
 			document.add(new Paragraph("------------------------------------------------------------------"));
 			document.add(new Paragraph("Bus Details:"));
@@ -265,7 +270,11 @@ public class UserServiceImpl implements UserService {
 			EmailResponse emailResponse = new EmailResponse();
 			emailResponse.setToemail(ticketResponse.getUserDetails().getEmailId());
 			emailResponse.setSubject("Ust BusTicket Invoice");
-			emailResponse.setBody("Please find the below Ticket Confirmation Details for your HAPPY JOURNEY!!");
+			if (ticketStatus.equals("CONFIRMED")) {
+				emailResponse.setBody("Please find the below Ticket Confirmation Details for your HAPPY JOURNEY!!");
+			} else {
+				emailResponse.setBody("below Ticket Cancelled Successfully!");
+			}
 			emailResponse.setInvoice(pdfBytes);
 			postData(url, emailResponse);
 
@@ -284,4 +293,55 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Override
+	public ResponseEntity<?> cancelTickets(String tId) {
+		TicketResponse ticketResponse = null;
+		PassengerResponse psngResponse = null;
+		List<PassengerResponse> allPassenger = new ArrayList<>();
+		if (Objects.isNull(tId)) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("invalid.input"), HttpStatus.BAD_REQUEST.value()));
+		}
+		try {
+			Optional<BookTickets> tickets = bookTicketsRepository.findById(tId);
+			if (!tickets.isPresent()) {
+				return ResponseEntity
+						.ok(new MessageResponse(env.getProperty("ticket.not.found"), HttpStatus.BAD_REQUEST.value()));
+			} else {
+				BookTickets cancelTickets = tickets.get();
+
+				cancelTickets.setStatus(TicketStatus.CANCELLED);
+
+				bookTicketsRepository.save(cancelTickets);
+
+				UserDetails userInfo = UserDetails.builder().userId(cancelTickets.getUserId().getId())
+						.userName(cancelTickets.getUserId().getUsername()).emailId(cancelTickets.getUserId().getEmail())
+						.build();
+
+				psngResponse = PassengerResponse.builder().ticketId(cancelTickets.getTicketId())
+						.PassengerName(cancelTickets.getPassengerName()).age(cancelTickets.getAge())
+						.gender(cancelTickets.getGender()).date(cancelTickets.getBusId().getDate())
+						.seatNo(cancelTickets.getSeatNo()).status(cancelTickets.getStatus()).build();
+				allPassenger.add(psngResponse);
+
+				ticketResponse = TicketResponse.builder().userDetails(userInfo).busDetails(cancelTickets.getBusId())
+						.passengers(allPassenger).build();
+
+				try {
+					sendInvoice(ticketResponse);
+				} catch (DocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				return ResponseEntity.ok(new MessageResponse(HttpStatus.OK.value(),
+						env.getProperty("ticket.cancel.success"), ticketResponse));
+
+			}
+
+		} catch (Exception e) {
+			return ResponseEntity
+					.ok(new MessageResponse(env.getProperty("ticket.not.found"), HttpStatus.NOT_FOUND.value()));
+		}
+	}
 }

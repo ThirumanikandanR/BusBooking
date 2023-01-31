@@ -52,4 +52,12 @@ public class UserController {
 	public ResponseEntity<?> viewTicketsByTicketId(@PathVariable String tId){
 		return userService.viewTicketsByTicketId(tId);
 	}
+	
+	
+	@GetMapping("/cancel/ticket/{tId}")
+	public ResponseEntity<?> cancelTickets(@PathVariable String tId) {
+
+		return userService.cancelTickets(tId);
+	}
+	
 }

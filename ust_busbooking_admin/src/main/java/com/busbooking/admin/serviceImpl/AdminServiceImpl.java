@@ -15,6 +15,7 @@ import com.busbooking.admin.request.BusDetailsDto;
 import com.busbooking.admin.response.AllPassengerResponse;
 import com.busbooking.admin.response.PassengerDetails;
 import com.busbooking.admin.service.AdminService;
+import com.busbooking.data.enums.TicketStatus;
 import com.busbooking.data.model.BookTickets;
 import com.busbooking.data.model.BusDetails;
 import com.busbooking.data.payload.response.MessageResponse;
@@ -149,12 +150,14 @@ public class AdminServiceImpl implements AdminService {
 		List<PassengerDetails> allpassenger = new ArrayList<>();
 
 		for (BookTickets pass : passengers) {
+			if(pass.getStatus().equals(TicketStatus.CONFIRMED)) {
 
 			PassengerDetails passengerDetails = PassengerDetails.builder().PassengerName(pass.getPassengerName())
 					.ticketId(pass.getTicketId()).age(pass.getAge()).gender(pass.getGender()).seatNo(pass.getSeatNo())
 					.date(pass.getDate()).status(pass.getStatus()).build();
 
 			allpassenger.add(passengerDetails);
+			}
 		}
 		AllPassengerResponse allPassengerResponse = AllPassengerResponse.builder().bus(bId.get()).passengers(allpassenger)
 				.build();
@@ -195,4 +198,5 @@ public class AdminServiceImpl implements AdminService {
 					.ok(new MessageResponse(env.getProperty("update.seatCount.fail"), HttpStatus.BAD_REQUEST.value()));
 		}
 	}
+	
 }

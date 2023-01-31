@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.busbooking.auth.UstBusbookingAuthApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.898 s - in com.busbooking.auth.UstBusbookingAuthApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 80.139 s - in com.busbooking.auth.UstBusbookingAuthApplicationTests
