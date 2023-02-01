@@ -38,9 +38,16 @@ import com.busbooking.user.response.PassengerResponse;
 import com.busbooking.user.response.TicketResponse;
 import com.busbooking.user.response.UserDetails;
 import com.busbooking.user.service.UserService;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfWriter;
 
 @Service
@@ -225,14 +232,37 @@ public class UserServiceImpl implements UserService {
 	public void sendInvoice(TicketResponse ticketResponse) throws DocumentException {
 
 		String ticketStatus = null;
+
 		try {
+			// generate QR code here
+			String data = ticketResponse.toString();
+
+			int width = 200;
+			int height = 200;
+			QRCodeWriter qrCodeWriter = new QRCodeWriter();
+			BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, width, height);
+			java.awt.Image qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+			// Convert the QR code image to a iText Image
+			Image image = Image.getInstance(qrImage, null);
+
+			// send logo in ticket pdf here
+			String logoUrl = "images\\TicketImage.JPG";
+			Image img = Image.getInstance(logoUrl);
+			img.scaleAbsolute(200, 200);
+			Phrase phrase = new Phrase();
+			phrase.add(new Chunk(img, 350, -200));
+			System.out.println(img);
+
 			Document document = new Document();
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 //	         FileOutputStream baos=new FileOutputStream(new File("E:\\BusTicket_Booking\\InvoiceLocation\\Tickets.pdf"));
 			PdfWriter.getInstance(document, baos);
+
 			document.open();
 
 			document.add(new Paragraph("Bus Ticket Invoice"));
+			document.add(new Paragraph(phrase));
 			document.add(new Paragraph("------------------------------------------------------------------"));
 			document.add(new Paragraph("User Details:"));
 			document.add(new Paragraph("User Id:" + ticketResponse.getUserDetails().getUserId()));
@@ -261,6 +291,7 @@ public class UserServiceImpl implements UserService {
 			document.add(new Paragraph("Departure Time:" + ticketResponse.getBusDetails().getDepTime()));
 			document.add(new Paragraph("Arriving Time:" + ticketResponse.getBusDetails().getArvTime()));
 			document.add(new Paragraph("Ticket Price:" + ticketResponse.getBusDetails().getTkkPrice()));
+			document.add(image);
 			document.close();
 
 			byte[] pdfBytes = baos.toByteArray();
