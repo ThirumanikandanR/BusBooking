@@ -291,7 +291,9 @@ public class UserServiceImpl implements UserService {
 			document.add(new Paragraph("Departure Time:" + ticketResponse.getBusDetails().getDepTime()));
 			document.add(new Paragraph("Arriving Time:" + ticketResponse.getBusDetails().getArvTime()));
 			document.add(new Paragraph("Ticket Price:" + ticketResponse.getBusDetails().getTkkPrice()));
+			if (ticketStatus.equals("CONFIRMED")) {
 			document.add(image);
+			}
 			document.close();
 
 			byte[] pdfBytes = baos.toByteArray();
